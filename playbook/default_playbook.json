@@ -1,0 +1,122 @@
+{
+  "contract_types": {
+    "NDA": {
+      "name": "Non-Disclosure Agreement",
+      "clauses": [
+        {
+          "clause_type": "Confidentiality Term",
+          "description": "The duration for which information must remain confidential.",
+          "standard_guideline": "Standard confidentiality duration is 3 to 5 years after termination of the agreement.",
+          "risk_triggers": [
+            "Perpetual confidentiality obligations for standard business information (unless it concerns Trade Secrets).",
+            "Obligations shorter than 2 years for sensitive IP or proprietary technology."
+          ]
+        },
+        {
+          "clause_type": "Permitted Disclosures",
+          "description": "Exceptions under which receiving party can disclose confidential information.",
+          "standard_guideline": "Standard is to permit disclosure to representatives, affiliates, and advisors who need to know and are bound by confidentiality, or as required by law.",
+          "risk_triggers": [
+            "Lack of standard legal compulsion exception (obligation to comply with subpoenas without liability).",
+            "Inability to share with standard legal/financial advisors."
+          ]
+        },
+        {
+          "clause_type": "Remedies",
+          "description": "What happens if confidentiality is breached.",
+          "standard_guideline": "Injunctions and equitable relief without the necessity of posting a bond.",
+          "risk_triggers": [
+            "Liquidated damages or heavy predefined financial penalties.",
+            "Uncapped liability specifically for simple, unintentional breaches (should be standard liability caps or equitable relief)."
+          ]
+        },
+        {
+          "clause_type": "Governing Law & Jurisdiction",
+          "description": "Which state/country law governs and where disputes are settled.",
+          "standard_guideline": "Neutral or mutual jurisdictions like New York, Delaware, or California.",
+          "risk_triggers": [
+            "Unfavorable, remote, or foreign jurisdictions (e.g., specific foreign courts with high cost and risk).",
+            "Exclusion of standard waiver of jury trial (sometimes preferred)."
+          ]
+        }
+      ]
+    },
+    "SaaS_Agreement": {
+      "name": "Software-as-a-Service (SaaS) Agreement",
+      "clauses": [
+        {
+          "clause_type": "Limitation of Liability",
+          "description": "Cap on financial liability of either party in case of damage or breach.",
+          "standard_guideline": "Liability capped at the total amount paid in the 12 months preceding the claim. Mutual cap is preferred.",
+          "risk_triggers": [
+            "Uncapped liability for standard breaches of agreement.",
+            "One-sided cap where only the service provider is capped but customer is uncapped.",
+            "Unusually low liability cap (e.g., $100 flat) for critical services."
+          ]
+        },
+        {
+          "clause_type": "Indemnification",
+          "description": "Duty of one party to compensate the other for losses from third-party claims.",
+          "standard_guideline": "Provider should indemnify customer for IP infringement claims. Customer should indemnify provider for customer data infringement or misuse.",
+          "risk_triggers": [
+            "Broad, general indemnifications for negligence without limitation.",
+            "No IP infringement indemnity from the SaaS provider.",
+            "Obligation to indemnify for indirect or consequential third-party damages."
+          ]
+        },
+        {
+          "clause_type": "Service Level Agreement (SLA)",
+          "description": "Commitment regarding service uptime and remedies for downtime.",
+          "standard_guideline": "99.9% uptime commitment with service credits as the sole and exclusive remedy for failure.",
+          "risk_triggers": [
+            "No uptime commitment or SLA whatsoever.",
+            "No remedies or credits for significant service outages.",
+            "Downtime definition that excludes all maintenance windows without limits."
+          ]
+        },
+        {
+          "clause_type": "Termination for Convenience",
+          "description": "Right of a party to terminate the contract without cause.",
+          "standard_guideline": "Standard is to permit termination for convenience with 30-90 days written notice, or no termination for convenience during the initial term if it is a multi-year commitment.",
+          "risk_triggers": [
+            "One-sided termination for convenience where the provider can terminate at any time, but customer cannot.",
+            "Short termination notice periods (e.g., less than 10 days) by provider."
+          ]
+        }
+      ]
+    },
+    "Employment_Agreement": {
+      "name": "Employment Agreement",
+      "clauses": [
+        {
+          "clause_type": "Non-Compete",
+          "description": "Restriction on employee working for competitors after leaving.",
+          "standard_guideline": "Reasonable duration (typically 6-12 months), limited geographic scope, and limited to direct competitors.",
+          "risk_triggers": [
+            "Duration exceeding 12 months.",
+            "Nationwide or worldwide geographic scope without clear justification.",
+            "Overly broad definitions of competitor that prevent any employment in the industry."
+          ]
+        },
+        {
+          "clause_type": "Intellectual Property Assignment",
+          "description": "Ownership of creations developed by the employee during employment.",
+          "standard_guideline": "Standard IP assignment of work created during employment and relating to the company's business or using company resources.",
+          "risk_triggers": [
+            "Assignment of work created outside working hours, without company resources, and unrelated to company business.",
+            "Lack of clean waiver of moral rights."
+          ]
+        },
+        {
+          "clause_type": "Severance",
+          "description": "Compensation paid upon termination without cause.",
+          "standard_guideline": "Severance of 1-3 months salary, typically contingent on signing a release of claims.",
+          "risk_triggers": [
+            "No severance provision for termination without cause.",
+            "Immediate termination without cause with zero compensation or notice."
+          ]
+        }
+      ]
+    }
+  }
+}

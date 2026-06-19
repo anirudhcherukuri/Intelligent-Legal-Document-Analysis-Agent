@@ -1,0 +1,28 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+
+# Local configuration
+.env
+
+# Cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Databases and user uploads
+data/
+backend/data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+.agents/

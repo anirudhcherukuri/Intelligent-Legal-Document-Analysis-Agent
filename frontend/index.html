@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegalAgent.ai - Intelligent Legal Document Analysis Agent</title>
+    <!-- Outfit Font for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <h2>LegalAgent<span>.ai</span></h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-tab="studio">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Analysis Studio</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Semantic Search</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="vault">
+                    <i class="fa-solid fa-box-archive"></i>
+                    <span>Document Vault</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="playbook">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                    <span>Playbook Manager</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="settings">
+                    <i class="fa-solid fa-gears"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="api-status" id="api-status-indicator">
+                    <span class="status-dot offline"></span>
+                    <span class="status-text">API Key Required</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Global API Key Warning -->
+            <div class="warning-banner hidden" id="api-warning-banner">
+                <div class="warning-icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="warning-text">
+                    <strong>OpenAI API Key Not Found:</strong> Analysis requires an OpenAI API Key. Please add one in <a href="#" onclick="switchTab('settings'); return false;">Settings</a>.
+                </div>
+            </div>
+
+            <!-- TAB: Analysis Studio -->
+            <section class="tab-content" id="tab-studio">
+                <header class="tab-header">
+                    <h1>Analysis Studio</h1>
+                    <p>Upload a contract and trigger our 3-agent pipeline for automatic clause extraction, risk assessment, and comparison.</p>
+                </header>
+
+                <div class="studio-layout">
+                    <!-- Control Panel (Left) -->
+                    <div class="panel upload-panel">
+                        <h3>Ingest Contract</h3>
+                        <form id="upload-form" class="upload-form">
+                            <!-- Drag & Drop Zone -->
+                            <div class="drop-zone" id="drop-zone">
+                                <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                                <span class="drop-text">Drag & drop your contract here</span>
+                                <span class="drop-subtext">Supports PDF, DOCX, TXT (Max 15MB)</span>
+                                <input type="file" id="contract-file" accept=".pdf,.docx,.txt" class="file-input" required>
+                            </div>
+                            
+                            <!-- Document Info (Selected File) -->
+                            <div class="selected-file-info hidden" id="selected-file-info">
+                                <div class="file-details">
+                                    <i class="fa-regular fa-file-pdf file-icon" id="file-icon-preview"></i>
+                                    <div class="file-metadata">
+                                        <span class="file-name" id="selected-file-name">contract_nda.pdf</span>
+                                        <span class="file-size" id="selected-file-size">145 KB</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-remove-file" id="btn-remove-file">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="contract-type-select">Contract Classification</label>
+                                <select id="contract-type-select" class="form-select">
+                                    <option value="NDA">Non-Disclosure Agreement (NDA)</option>
+                                    <option value="SaaS_Agreement">SaaS Agreement</option>
+                                    <option value="Employment_Agreement">Employment Agreement</option>
+                                    <option value="General">General / Other Contract</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary" id="btn-analyze" disabled>
+                                <i class="fa-solid fa-play"></i> Run Agent Analysis
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Workflow & Results Panel (Right) -->
+                    <div class="panel results-panel">
+                        <!-- State 1: Empty / Waiting -->
+                        <div class="state-empty" id="results-empty">
+                            <div class="empty-icon-container">
+                                <i class="fa-solid fa-scale-unbalanced-bln"></i>
+                            </div>
+                            <h3>Awaiting Analysis</h3>
+                            <p>Upload a contract file on the left and select the appropriate classification to trigger the agent pipeline.</p>
+                        </div>
+
+                        <!-- State 2: Running Pipeline -->
+                        <div class="state-running hidden" id="results-running">
+                            <h3>Executing LangGraph Agent Pipeline</h3>
+                            <p>Our multi-agent pipeline is processing your contract in real-time...</p>
+                            
+                            <div class="pipeline-visualizer">
+                                <div class="pipeline-node" id="node-extractor">
+                                    <div class="node-icon"><i class="fa-solid fa-file-import"></i></div>
+                                    <div class="node-label">Extractor Agent</div>
+                                    <div class="node-status">Waiting</div>
+                                </div>
+                                <div class="pipeline-connector" id="conn-1"></div>
+                                <div class="pipeline-node" id="node-analyzer">
+                                    <div class="node-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                                    <div class="node-label">Risk Analyzer</div>
+                                    <div class="node-status">Waiting</div>
+                                </div>
+                                <div class="pipeline-connector" id="conn-2"></div>
+                                <div class="pipeline-node" id="node-comparator">
+                                    <div class="node-icon"><i class="fa-solid fa-code-compare"></i></div>
+                                    <div class="node-label">Comparator Agent</div>
+                                    <div class="node-status">Waiting</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- State 3: Analysis Complete -->
+                        <div class="state-complete hidden" id="results-complete">
+                            <!-- Summary Card -->
+                            <div class="summary-card">
+                                <div class="summary-main">
+                                    <div class="risk-badge-large" id="overall-risk-badge">HIGH RISK</div>
+                                    <div class="summary-details">
+                                        <h4 id="completed-doc-title">contract_nda.pdf</h4>
+                                        <p id="completed-doc-meta">NDA • Analyzed on June 19, 2026</p>
+                                    </div>
+                                </div>
+                                <p class="summary-text" id="analysis-summary-text">
+                                    This agreement exhibits significant deviation from the company playbook. Key concerns include a perpetual confidentiality period and unilateral remedies that heavily favor the counterparty.
+                                </p>
+                            </div>
+
+                            <!-- Tabs for different agent outputs -->
+                            <div class="tabs-sub">
+                                <button class="tab-sub-btn active" data-subtab="clauses">Extracted Clauses</button>
+                                <button class="tab-sub-btn" data-subtab="risks">Risk Assessment</button>
+                                <button class="tab-sub-btn" data-subtab="comparison">Playbook Alignment</button>
+                            </div>
+
+                            <!-- Sub-Tab Content: Extracted Clauses -->
+                            <div class="sub-tab-content" id="subtab-clauses">
+                                <div class="clauses-list" id="extracted-clauses-container">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Sub-Tab Content: Risk Assessment -->
+                            <div class="sub-tab-content hidden" id="subtab-risks">
+                                <div class="risks-list" id="risk-analysis-container">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Sub-Tab Content: Comparison -->
+                            <div class="sub-tab-content hidden" id="subtab-comparison">
+                                <div class="comparison-table-container">
+                                    <table class="comparison-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Clause Type</th>
+                                                <th>Extracted Text</th>
+                                                <th>Playbook Standard</th>
+                                                <th>Status</th>
+                                                <th>Action Plan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="comparison-container">
+                                            <!-- Rendered dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Semantic Search -->
+            <section class="tab-content hidden" id="tab-search">
+                <header class="tab-header">
+                    <h1>Semantic Search Portal</h1>
+                    <p>Ask natural language questions across your entire contract repository. Our vector database returns key answers in milliseconds.</p>
+                </header>
+
+                <div class="search-container">
+                    <div class="search-bar-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-bar-icon"></i>
+                        <input type="text" id="search-query" class="search-input-field" placeholder="e.g., Find all contracts with unlimited liability or a non-compete duration of more than 12 months...">
+                        <button class="btn-search" id="btn-run-search">Search Vault</button>
+                    </div>
+
+                    <div class="search-filters">
+                        <span class="filter-label">Filter by type:</span>
+                        <div class="filter-chips">
+                            <button class="chip active" data-filter="All">All Types</button>
+                            <button class="chip" data-filter="NDA">NDAs</button>
+                            <button class="chip" data-filter="SaaS_Agreement">SaaS Agreements</button>
+                            <button class="chip" data-filter="Employment_Agreement">Employment</button>
+                            <button class="chip" data-filter="General">General</button>
+                        </div>
+                    </div>
+
+                    <div class="search-results-section">
+                        <!-- Searching spinner -->
+                        <div class="search-loading hidden" id="search-loading">
+                            <div class="spinner"></div>
+                            <p>Querying ChromaDB index...</p>
+                        </div>
+
+                        <!-- Results List -->
+                        <div class="search-results-list" id="search-results-container">
+                            <div class="state-empty">
+                                <i class="fa-solid fa-database empty-icon"></i>
+                                <h3>Query Vector Repository</h3>
+                                <p>Type a natural language query above to retrieve matching contract passages, clause details, and relevance scores.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Document Vault -->
+            <section class="tab-content hidden" id="tab-vault">
+                <header class="tab-header">
+                    <h1>Document Vault</h1>
+                    <p>Browse and manage the contracts currently indexed in the ChromaDB vector database.</p>
+                </header>
+
+                <div class="vault-container">
+                    <div class="vault-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="stat-val" id="vault-stat-count">0</div>
+                            <div class="stat-desc">Total Contracts</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fa-solid fa-network-wired"></i></div>
+                            <div class="stat-val" id="vault-stat-chunks">0</div>
+                            <div class="stat-desc">Vector Chunks</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fa-solid fa-server"></i></div>
+                            <div class="stat-val">ChromaDB</div>
+                            <div class="stat-desc">Database Type</div>
+                        </div>
+                    </div>
+
+                    <div class="panel vault-list-panel">
+                        <div class="vault-list-header">
+                            <h3>Indexed Contracts</h3>
+                            <button class="btn-secondary" id="btn-refresh-vault">
+                                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                            </button>
+                        </div>
+                        
+                        <div class="vault-table-wrapper">
+                            <table class="vault-table">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Classification</th>
+                                        <th>Uploaded Date</th>
+                                        <th>File Size</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vault-documents-list">
+                                    <!-- Rendered dynamically -->
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">Loading documents...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Playbook Manager -->
+            <section class="tab-content hidden" id="tab-playbook">
+                <header class="tab-header">
+                    <h1>Playbook Manager</h1>
+                    <p>Customize the legal rules, standard guidelines, and risk triggers used by the Risk Analyzer and Comparator Agents.</p>
+                </header>
+
+                <div class="playbook-container">
+                    <div class="panel playbook-panel">
+                        <div class="playbook-editor-header">
+                            <div class="playbook-desc">
+                                <h3>Playbook Configuration (JSON)</h3>
+                                <p>Modifications here directly instruct the Comparator Node on acceptable terms and renegotiation strategies.</p>
+                            </div>
+                            <button class="btn-primary" id="btn-save-playbook">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Playbook
+                            </button>
+                        </div>
+                        
+                        <div class="playbook-editor-wrapper">
+                            <textarea id="playbook-json-textarea" class="playbook-textarea" spellcheck="false"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Settings -->
+            <section class="tab-content hidden" id="tab-settings">
+                <header class="tab-header">
+                    <h1>Settings</h1>
+                    <p>Configure integration parameters and API keys for the system.</p>
+                </header>
+
+                <div class="settings-container">
+                    <div class="panel settings-panel-card">
+                        <h3>OpenAI API Credentials</h3>
+                        <p class="settings-desc">
+                            The multi-agent pipeline uses GPT-4 and OpenAI Embeddings. Your API Key is stored locally and used only to communicate directly with OpenAI.
+                        </p>
+                        
+                        <form id="settings-form" class="settings-form">
+                            <div class="form-group">
+                                <label for="openai-api-key-input">OpenAI API Key</label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" id="openai-api-key-input" class="form-input" placeholder="sk-..." required>
+                                    <button type="button" class="btn-toggle-password" id="btn-toggle-key-visibility">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                                <span class="help-text">Should be a valid OpenAI API key starting with 'sk-'.</span>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary" id="btn-save-settings">
+                                <i class="fa-solid fa-circle-check"></i> Save Credentials
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="panel settings-panel-card mt-4">
+                        <h3>System Status</h3>
+                        <div class="system-status-list">
+                            <div class="status-row">
+                                <span class="status-label">FastAPI Backend</span>
+                                <span class="status-badge success">Online</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">ChromaDB Vector Store</span>
+                                <span class="status-badge success">Active</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">OpenAI Connectivity</span>
+                                <span class="status-badge" id="openai-status-badge">Checking...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>
