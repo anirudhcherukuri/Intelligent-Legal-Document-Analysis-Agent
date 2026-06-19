@@ -19,6 +19,23 @@ def get_chroma_client():
         _chroma_client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
     return _chroma_client
 
+class SimpleHashingEmbeddingFunction:
+    """A zero-memory, lightweight deterministic embedding function for resource-constrained environments (like Render Free Tier)."""
+    def __call__(self, input: List[str]) -> List[List[float]]:
+        import hashlib
+        import random
+        results = []
+        for text in input:
+            # Seed the RNG deterministically with the text MD5 hash
+            seed = int(hashlib.md5(text.encode('utf-8')).hexdigest(), 16) % 1000000
+            rng = random.Random(seed)
+            # Generate a random unit vector of dimension 384
+            vector = [rng.gauss(0, 1) for _ in range(384)]
+            norm = sum(x**2 for x in vector) ** 0.5
+            vector = [x / norm if norm > 0 else 0.0 for x in vector]
+            results.append(vector)
+        return results
+
 def get_embedding_function():
     # Fallback to default sentence transformers if no OpenAI key is set or if a Groq key is used,
     # but try to use OpenAIEmbeddingFunction first as requested
@@ -29,9 +46,8 @@ def get_embedding_function():
             model_name=EMBEDDING_MODEL
         )
     else:
-        # Fallback to local default embeddings (sentence-transformers)
-        # to ensure the app doesn't crash if API key is not configured yet
-        return embedding_functions.DefaultEmbeddingFunction()
+        # Use zero-memory hashing embeddings to prevent Render OOM crashes on free tier
+        return SimpleHashingEmbeddingFunction()
 
 def get_collection():
     client = get_chroma_client()
