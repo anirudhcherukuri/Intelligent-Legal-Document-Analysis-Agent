@@ -1,5 +1,8 @@
-// API Base URL (Assumed same host since FastAPI serves static files)
-const API_BASE = window.location.origin;
+// API Base URL (Assumed same host since FastAPI serves static files, or loaded from localStorage for separate deployment)
+let API_BASE = localStorage.getItem('backend_url') || window.location.origin;
+if (API_BASE.endsWith('/')) {
+    API_BASE = API_BASE.slice(0, -1);
+}
 
 // State management
 let appState = {
@@ -117,7 +120,13 @@ async function checkApiKeyConfig(fillSettings = false) {
 function initSettingsForm() {
     const settingsForm = document.getElementById('settings-form');
     const apiKeyInput = document.getElementById('openai-api-key-input');
+    const backendUrlInput = document.getElementById('backend-url-input');
     const toggleBtn = document.getElementById('btn-toggle-key-visibility');
+
+    // Load saved settings
+    if (backendUrlInput) {
+        backendUrlInput.value = localStorage.getItem('backend_url') || '';
+    }
 
     toggleBtn.addEventListener('click', () => {
         const isPassword = apiKeyInput.type === 'password';
@@ -128,8 +137,11 @@ function initSettingsForm() {
     settingsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const key = apiKeyInput.value.trim();
-        if (!key.startsWith('sk-')) {
-            alert('Invalid OpenAI Key. It must start with "sk-".');
+        const backendUrl = backendUrlInput ? backendUrlInput.value.trim() : '';
+
+        // Validate key if provided
+        if (key && !(key.startsWith('sk-') || key.startsWith('gsk_'))) {
+            alert('Invalid API Key. It must start with "sk-" (OpenAI) or "gsk_" (Groq).');
             return;
         }
 
@@ -139,20 +151,38 @@ function initSettingsForm() {
         btnSave.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
 
         try {
-            const response = await fetch(`${API_BASE}/api/config`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ openai_api_key: key })
-            });
-
-            if (response.ok) {
-                alert('OpenAI credentials saved and activated!');
-                apiKeyInput.value = '';
-                checkApiKeyConfig();
+            // Save backend URL locally
+            if (backendUrl) {
+                localStorage.setItem('backend_url', backendUrl);
+                API_BASE = backendUrl;
+                if (API_BASE.endsWith('/')) {
+                    API_BASE = API_BASE.slice(0, -1);
+                }
             } else {
-                const err = await response.json();
-                alert(`Error saving credentials: ${err.detail || 'Unknown error'}`);
+                localStorage.removeItem('backend_url');
+                API_BASE = window.location.origin;
             }
+
+            // Save key to backend if provided
+            if (key) {
+                const response = await fetch(`${API_BASE}/api/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ openai_api_key: key })
+                });
+
+                if (response.ok) {
+                    alert('Settings updated and credentials saved!');
+                    apiKeyInput.value = '';
+                } else {
+                    const err = await response.json();
+                    alert(`Error saving credentials: ${err.detail || 'Unknown error'}`);
+                }
+            } else {
+                alert('Settings updated successfully!');
+            }
+            
+            checkApiKeyConfig();
         } catch (error) {
             console.error('Settings update failed:', error);
             alert('Failed to connect to the backend server.');
