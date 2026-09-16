@@ -51,13 +51,13 @@ def get_llm():
     if not api_key or api_key == "your_openai_api_key_here":
         raise ValueError("API Key is missing. Please set it in your environment or Settings.")
     
-    if api_key.startswith("gsk_"):
-        return ChatOpenAI(
-            model="llama-3.3-70b-versatile",
-            temperature=0.0,
-            api_key=api_key,
-            base_url="https://api.groq.com/openai/v1"
-        )
+  if api_key.startswith("gsk_"):
+    return ChatOpenAI(
+        model="openai/gpt-oss-120b",
+        temperature=0.0,
+        api_key=api_key,
+        base_url="https://api.groq.com/openai/v1"
+    )
     
     return ChatOpenAI(
         model=LLM_MODEL,
